@@ -68,17 +68,11 @@ class Button(object):
         self.io = digitalio.DigitalInOut(pin)
         self.io.direction = direction
         self.io.pull = pull
-        self.last_active_time = 0
-        self.last_press_time = 0
-        self.keep_press_interval = 1
-        self.first_press_interval = 5
-        self.debounce_interval = 0
         self.status = "up"
 
     def click(self):
         if self.status == "up":
             if self.down():
-                self.debounce()
                 self.status = "debounce"
         elif self.status == "debounce":
             if self.up():
@@ -92,22 +86,18 @@ class Button(object):
     def continue_click(self):
         if self.status == "up":
             if self.down():
-                self.debounce(value = self.first_press_interval)
                 self.status = "debounce"
+                return True
         elif self.status == "debounce":
             if self.down():
-                self.debounce(value = self.keep_press_interval)
                 return True
             elif self.up():
                 self.status = "up"
-                return True
+                return False
         return False
 
     def down(self):
         return not self.io.value
-
-    def debounce(self, value = 2):
-        self.debounce_interval = value
 
     def up(self):
         return self.io.value
